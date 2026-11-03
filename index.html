@@ -52,31 +52,42 @@
       font-size: 22px;
     }
 
-    /* PESTAÑAS (TABS) */
+    /* PESTAÑAS (TABS CON COLOR EN EL CUADRO COMPLETO) */
     .tabs {
       display: flex;
+      gap: 8px;
       margin-bottom: 20px;
-      border-bottom: 2px solid #ecf0f1;
+      background-color: #f8f9fa;
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
     }
     .tab {
       flex: 1;
-      padding: 12px;
+      padding: 12px 10px;
       text-align: center;
       cursor: pointer;
       font-weight: bold;
-      color: #7f8c8d;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
+      color: #4a5568;
+      background-color: #e2e8f0;
+      border-radius: 7px;
+      transition: all 0.25s ease;
       user-select: none;
       font-size: 15px;
+      border: none;
+    }
+    .tab:hover {
+      opacity: 0.9;
     }
     .tab.active-retiro {
-      color: #2980b9;
-      border-bottom-color: #2980b9;
+      background-color: #2980b9 !important;
+      color: #ffffff !important;
+      box-shadow: 0 3px 8px rgba(41, 128, 185, 0.3);
     }
     .tab.active-entrega {
-      color: #27ae60;
-      border-bottom-color: #27ae60;
+      background-color: #27ae60 !important;
+      color: #ffffff !important;
+      box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
     }
 
     .form-section { display: none; }
@@ -179,21 +190,21 @@
   <div class="container">
     <h2>Control de Equipos</h2>
 
-    <!-- PESTAÑAS PRINCIPALES -->
+    <!-- PESTAÑAS PRINCIPALES CON FONDO SOLIDIFICADO -->
     <div class="tabs">
-      <div id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</div>
-      <div id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</div>
+      <button id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
+      <button id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
     </div>
 
     <!-- SECCIÓN RETIRO -->
     <div id="seccionRetiro" class="form-section active">
       <div id="statusRetiro" class="status" onclick="resetFormulario('retiro')" title="Haz clic para reiniciar">
-        Paso 1: Pistolea o escribe el código del EQUIPO
+        Paso 1: Anotación de número de EQUIPO
       </div>
 
       <div class="input-group">
         <label for="inputEquipoRetiro">N° de Equipo:</label>
-        <input type="text" inputmode="numeric" id="inputEquipoRetiro" placeholder="Pistolear equipo..." autocomplete="off">
+        <input type="text" inputmode="numeric" id="inputEquipoRetiro" placeholder="Anotar número de equipo..." autocomplete="off">
       </div>
 
       <div class="input-group">
@@ -207,12 +218,12 @@
     <!-- SECCIÓN ENTREGA -->
     <div id="seccionEntrega" class="form-section">
       <div id="statusEntrega" class="status status-step2" onclick="resetFormulario('entrega')" title="Haz clic para reiniciar">
-        Paso 1: Pistolea o escribe el código del EQUIPO a devolver
+        Paso 1: Anotar número de EQUIPO a devolver
       </div>
 
       <div class="input-group">
         <label for="inputEquipoEntrega">N° de Equipo a Devolver:</label>
-        <input type="text" inputmode="numeric" id="inputEquipoEntrega" placeholder="Pistolear equipo..." autocomplete="off">
+        <input type="text" inputmode="numeric" id="inputEquipoEntrega" placeholder="Anotar número de equipo..." autocomplete="off">
       </div>
 
       <button id="btnGuardarEntrega" class="btn-guardar entrega" onclick="confirmarYGuardar('entrega')" disabled>💾 Guardar Entrega</button>
@@ -261,7 +272,7 @@
         inputRt.disabled = true;
         btnG.disabled = true;
         btnG.innerText = "💾 Guardar Retiro";
-        statusR.innerText = "Paso 1: Pistolea o escribe el código del EQUIPO";
+        statusR.innerText = "Paso 1: Anotación de número de EQUIPO";
         statusR.className = "status";
         setTimeout(() => inputEq.focus(), 50);
       } else {
@@ -273,7 +284,7 @@
         inputEqE.disabled = false;
         btnGE.disabled = true;
         btnGE.innerText = "💾 Guardar Entrega";
-        statusE.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
+        statusE.innerText = "Paso 1: Anotar número de EQUIPO a devolver";
         statusE.className = "status status-step2";
         setTimeout(() => inputEqE.focus(), 50);
       }
@@ -282,132 +293,5 @@
     function limpiarYNormalizarTexto(str) {
       if (!str) return "";
       let texto = str.trim().toUpperCase();
-      // Transformación automática si el RUT termina en -11 para escribir desde teclado numérico
       if (texto.endsWith("-11")) {
         texto = texto.slice(0, -3) + "-K";
-      }
-      return texto;
-    }
-
-    const inputEquipoRetiro = document.getElementById("inputEquipoRetiro");
-    const inputRutRetiro = document.getElementById("inputRutRetiro");
-    const btnGuardarRetiro = document.getElementById("btnGuardarRetiro");
-    const statusRetiro = document.getElementById("statusRetiro");
-
-    function procesarEquipoRetiro() {
-      const val = limpiarYNormalizarTexto(inputEquipoRetiro.value);
-      if (val !== "") {
-        inputEquipoRetiro.value = val;
-        if (!inputEquipoRetiro.disabled) {
-          inputEquipoRetiro.disabled = true;
-          inputRutRetiro.disabled = false;
-          statusRetiro.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
-          statusRetiro.className = "status status-step2";
-          inputRutRetiro.focus();
-        }
-      }
-    }
-
-    inputEquipoRetiro.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        procesarEquipoRetiro();
-      }
-    });
-
-    inputRutRetiro.addEventListener("input", function() {
-      btnGuardarRetiro.disabled = (inputRutRetiro.value.trim() === "");
-    });
-
-    inputRutRetiro.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        confirmarYGuardar("retiro");
-      }
-    });
-
-    const inputEquipoEntrega = document.getElementById("inputEquipoEntrega");
-    const btnGuardarEntrega = document.getElementById("btnGuardarEntrega");
-    const statusEntrega = document.getElementById("statusEntrega");
-
-    inputEquipoEntrega.addEventListener("input", function() {
-      const val = inputEquipoEntrega.value.trim();
-      btnGuardarEntrega.disabled = (val === "");
-    });
-
-    inputEquipoEntrega.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (inputEquipoEntrega.value.trim() !== "") {
-          confirmarYGuardar("entrega");
-        }
-      }
-    });
-
-    function confirmarYGuardar(modo) {
-      if (modo === "retiro") {
-        const equipo = limpiarYNormalizarTexto(inputEquipoRetiro.value);
-        const rut = limpiarYNormalizarTexto(inputRutRetiro.value);
-        if (!equipo || !rut) return;
-
-        inputEquipoRetiro.disabled = true;
-        inputRutRetiro.disabled = true;
-        btnGuardarRetiro.disabled = true;
-        btnGuardarRetiro.innerText = "⏳ Guardando...";
-        statusRetiro.innerText = "Guardando en el servidor...";
-
-        enviarPeticion("retiro", equipo, rut);
-      } else {
-        const equipo = limpiarYNormalizarTexto(inputEquipoEntrega.value);
-        if (!equipo) return;
-
-        inputEquipoEntrega.disabled = true;
-        btnGuardarEntrega.disabled = true;
-        btnGuardarEntrega.innerText = "⏳ Guardando...";
-        statusEntrega.innerText = "Guardando en el servidor...";
-
-        enviarPeticion("entrega", equipo, "");
-      }
-    }
-
-    function enviarPeticion(accion, equipo, rut) {
-      const payload = {
-        accion: accion,
-        equipo: equipo,
-        rut: rut,
-        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
-      };
-
-      google.script.run
-        .withSuccessHandler(function(res) {
-          if (accion === "retiro") {
-            if (res.status === "OK") {
-              statusRetiro.innerText = res.mensaje;
-              statusRetiro.className = "status success";
-            } else {
-              statusRetiro.innerText = res.mensaje;
-              statusRetiro.className = "status danger";
-            }
-            setTimeout(() => resetFormulario("retiro"), 2000);
-          } else {
-            if (res.status === "OK") {
-              statusEntrega.innerText = res.mensaje;
-              statusEntrega.className = "status success";
-            } else {
-              statusEntrega.innerText = res.mensaje;
-              statusEntrega.className = "status danger";
-            }
-            setTimeout(() => resetFormulario("entrega"), 2000);
-          }
-        })
-        .withFailureHandler(function(err) {
-          const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
-          targetStatus.innerText = "Error: " + err;
-          targetStatus.className = "status danger";
-          setTimeout(() => resetFormulario(accion), 3000);
-        })
-        .doPost({ postData: { contents: JSON.stringify(payload) } });
-    }
-  </script>
-</body>
-</html>
