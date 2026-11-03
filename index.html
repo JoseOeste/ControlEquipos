@@ -52,7 +52,7 @@
       font-size: 22px;
     }
 
-    /* PESTAÑAS (TABS CON COLOR EN EL CUADRO COMPLETO) */
+    /* PESTAÑAS (TABS CON RENDERIZADO CORREGIDO) */
     .tabs {
       display: flex;
       gap: 8px;
@@ -71,13 +71,11 @@
       color: #4a5568;
       background-color: #e2e8f0;
       border-radius: 7px;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       user-select: none;
       font-size: 15px;
       border: none;
-    }
-    .tab:hover {
-      opacity: 0.9;
+      outline: none;
     }
     .tab.active-retiro {
       background-color: #2980b9 !important;
@@ -190,10 +188,10 @@
   <div class="container">
     <h2>Control de Equipos</h2>
 
-    <!-- PESTAÑAS PRINCIPALES CON FONDO SOLIDIFICADO -->
+    <!-- PESTAÑAS PRINCIPALES CON INTERACCIÓN CORREGIDA -->
     <div class="tabs">
-      <button id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
-      <button id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
+      <button type="button" id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
+      <button type="button" id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
     </div>
 
     <!-- SECCIÓN RETIRO -->
@@ -212,7 +210,7 @@
         <input type="text" inputmode="numeric" id="inputRutRetiro" placeholder="Esperando equipo..." disabled autocomplete="off">
       </div>
 
-      <button id="btnGuardarRetiro" class="btn-guardar retiro" onclick="confirmarYGuardar('retiro')" disabled>💾 Guardar Retiro</button>
+      <button type="button" id="btnGuardarRetiro" class="btn-guardar retiro" onclick="confirmarYGuardar('retiro')" disabled>💾 Guardar Retiro</button>
     </div>
 
     <!-- SECCIÓN ENTREGA -->
@@ -226,7 +224,7 @@
         <input type="text" inputmode="numeric" id="inputEquipoEntrega" placeholder="Anotar número de equipo..." autocomplete="off">
       </div>
 
-      <button id="btnGuardarEntrega" class="btn-guardar entrega" onclick="confirmarYGuardar('entrega')" disabled>💾 Guardar Entrega</button>
+      <button type="button" id="btnGuardarEntrega" class="btn-guardar entrega" onclick="confirmarYGuardar('entrega')" disabled>💾 Guardar Entrega</button>
     </div>
 
     <div class="watermark">
@@ -245,14 +243,18 @@
       const seccionEntrega = document.getElementById("seccionEntrega");
 
       if (modo === "retiro") {
-        tabRetiro.className = "tab active-retiro";
-        tabEntrega.className = "tab";
+        tabRetiro.classList.add("active-retiro");
+        tabRetiro.classList.remove("active-entrega");
+        tabEntrega.classList.remove("active-retiro", "active-entrega");
+
         seccionRetiro.classList.add("active");
         seccionEntrega.classList.remove("active");
         resetFormulario("retiro");
       } else {
-        tabEntrega.className = "tab active-entrega";
-        tabRetiro.className = "tab";
+        tabEntrega.classList.add("active-entrega");
+        tabEntrega.classList.remove("active-retiro");
+        tabRetiro.classList.remove("active-retiro", "active-entrega");
+
         seccionEntrega.classList.add("active");
         seccionRetiro.classList.remove("active");
         resetFormulario("entrega");
@@ -295,3 +297,130 @@
       let texto = str.trim().toUpperCase();
       if (texto.endsWith("-11")) {
         texto = texto.slice(0, -3) + "-K";
+      }
+      return texto;
+    }
+
+    const inputEquipoRetiro = document.getElementById("inputEquipoRetiro");
+    const inputRutRetiro = document.getElementById("inputRutRetiro");
+    const btnGuardarRetiro = document.getElementById("btnGuardarRetiro");
+    const statusRetiro = document.getElementById("statusRetiro");
+
+    function procesarEquipoRetiro() {
+      const val = limpiarYNormalizarTexto(inputEquipoRetiro.value);
+      if (val !== "") {
+        inputEquipoRetiro.value = val;
+        if (!inputEquipoRetiro.disabled) {
+          inputEquipoRetiro.disabled = true;
+          inputRutRetiro.disabled = false;
+          inputRutRetiro.placeholder = "Anotar RUT de la persona...";
+          statusRetiro.innerText = "Paso 2: Anotar RUT de la persona";
+          statusRetiro.className = "status status-step2";
+          inputRutRetiro.focus();
+        }
+      }
+    }
+
+    inputEquipoRetiro.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        procesarEquipoRetiro();
+      }
+    });
+
+    inputRutRetiro.addEventListener("input", function() {
+      btnGuardarRetiro.disabled = (inputRutRetiro.value.trim() === "");
+    });
+
+    inputRutRetiro.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        confirmarYGuardar("retiro");
+      }
+    });
+
+    const inputEquipoEntrega = document.getElementById("inputEquipoEntrega");
+    const btnGuardarEntrega = document.getElementById("btnGuardarEntrega");
+    const statusEntrega = document.getElementById("statusEntrega");
+
+    inputEquipoEntrega.addEventListener("input", function() {
+      const val = inputEquipoEntrega.value.trim();
+      btnGuardarEntrega.disabled = (val === "");
+    });
+
+    inputEquipoEntrega.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (inputEquipoEntrega.value.trim() !== "") {
+          confirmarYGuardar("entrega");
+        }
+      }
+    });
+
+    function confirmarYGuardar(modo) {
+      if (modo === "retiro") {
+        const equipo = limpiarYNormalizarTexto(inputEquipoRetiro.value);
+        const rut = limpiarYNormalizarTexto(inputRutRetiro.value);
+        if (!equipo || !rut) return;
+
+        inputEquipoRetiro.disabled = true;
+        inputRutRetiro.disabled = true;
+        btnGuardarRetiro.disabled = true;
+        btnGuardarRetiro.innerText = "⏳ Guardando...";
+        statusRetiro.innerText = "Guardando en el servidor...";
+
+        enviarPeticion("retiro", equipo, rut);
+      } else {
+        const equipo = limpiarYNormalizarTexto(inputEquipoEntrega.value);
+        if (!equipo) return;
+
+        inputEquipoEntrega.disabled = true;
+        btnGuardarEntrega.disabled = true;
+        btnGuardarEntrega.innerText = "⏳ Guardando...";
+        statusEntrega.innerText = "Guardando en el servidor...";
+
+        enviarPeticion("entrega", equipo, "");
+      }
+    }
+
+    function enviarPeticion(accion, equipo, rut) {
+      const payload = {
+        accion: accion,
+        equipo: equipo,
+        rut: rut,
+        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+      };
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (accion === "retiro") {
+            if (res.status === "OK") {
+              statusRetiro.innerText = res.mensaje;
+              statusRetiro.className = "status success";
+            } else {
+              statusRetiro.innerText = res.mensaje;
+              statusRetiro.className = "status danger";
+            }
+            setTimeout(() => resetFormulario("retiro"), 2000);
+          } else {
+            if (res.status === "OK") {
+              statusEntrega.innerText = res.mensaje;
+              statusEntrega.className = "status success";
+            } else {
+              statusEntrega.innerText = res.mensaje;
+              statusEntrega.className = "status danger";
+            }
+            setTimeout(() => resetFormulario("entrega"), 2000);
+          }
+        })
+        .withFailureHandler(function(err) {
+          const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
+          targetStatus.innerText = "Error: " + err;
+          targetStatus.className = "status danger";
+          setTimeout(() => resetFormulario(accion), 3000);
+        })
+        .doPost({ postData: { contents: JSON.stringify(payload) } });
+    }
+  </script>
+</body>
+</html>
