@@ -52,7 +52,7 @@
       font-size: 22px;
     }
 
-    /* PESTAÑAS (TABS CON RENDERIZADO CORREGIDO) */
+    /* PESTAÑAS (TABS) CON RENDERIZADO VISUAL COMPLETO */
     .tabs {
       display: flex;
       gap: 8px;
@@ -188,7 +188,7 @@
   <div class="container">
     <h2>Control de Equipos</h2>
 
-    <!-- PESTAÑAS PRINCIPALES CON INTERACCIÓN CORREGIDA -->
+    <!-- PESTAÑAS PRINCIPALES -->
     <div class="tabs">
       <button type="button" id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
       <button type="button" id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
@@ -233,6 +233,9 @@
   </div>
 
   <script>
+    // PEGA AQUÍ LA URL PUBLICA DE TU WEB APP DE GOOGLE APPS SCRIPT (debe terminar en /exec)
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbweYvrfdTCcULjSd4sAkEZ2--wMiDiKedQV1BU76LJDEtbBwzLLBGkolHbxEzm4CIDnmA/exec"; 
+
     let modoActual = "retiro";
 
     function cambiarTab(modo) {
@@ -243,18 +246,14 @@
       const seccionEntrega = document.getElementById("seccionEntrega");
 
       if (modo === "retiro") {
-        tabRetiro.classList.add("active-retiro");
-        tabRetiro.classList.remove("active-entrega");
-        tabEntrega.classList.remove("active-retiro", "active-entrega");
-
+        tabRetiro.className = "tab active-retiro";
+        tabEntrega.className = "tab";
         seccionRetiro.classList.add("active");
         seccionEntrega.classList.remove("active");
         resetFormulario("retiro");
       } else {
-        tabEntrega.classList.add("active-entrega");
-        tabEntrega.classList.remove("active-retiro");
-        tabRetiro.classList.remove("active-retiro", "active-entrega");
-
+        tabEntrega.className = "tab active-entrega";
+        tabRetiro.className = "tab";
         seccionEntrega.classList.add("active");
         seccionRetiro.classList.remove("active");
         resetFormulario("entrega");
@@ -391,35 +390,39 @@
         fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
       };
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          if (accion === "retiro") {
-            if (res.status === "OK") {
-              statusRetiro.innerText = res.mensaje;
-              statusRetiro.className = "status success";
-            } else {
-              statusRetiro.innerText = res.mensaje;
-              statusRetiro.className = "status danger";
-            }
-            setTimeout(() => resetFormulario("retiro"), 2000);
+      fetch(URL_SCRIPT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (accion === "retiro") {
+          if (res.status === "OK") {
+            statusRetiro.innerText = res.mensaje;
+            statusRetiro.className = "status success";
           } else {
-            if (res.status === "OK") {
-              statusEntrega.innerText = res.mensaje;
-              statusEntrega.className = "status success";
-            } else {
-              statusEntrega.innerText = res.mensaje;
-              statusEntrega.className = "status danger";
-            }
-            setTimeout(() => resetFormulario("entrega"), 2000);
+            statusRetiro.innerText = res.mensaje;
+            statusRetiro.className = "status danger";
           }
-        })
-        .withFailureHandler(function(err) {
-          const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
-          targetStatus.innerText = "Error: " + err;
-          targetStatus.className = "status danger";
-          setTimeout(() => resetFormulario(accion), 3000);
-        })
-        .doPost({ postData: { contents: JSON.stringify(payload) } });
+          setTimeout(() => resetFormulario("retiro"), 2000);
+        } else {
+          if (res.status === "OK") {
+            statusEntrega.innerText = res.mensaje;
+            statusEntrega.className = "status success";
+          } else {
+            statusEntrega.innerText = res.mensaje;
+            statusEntrega.className = "status danger";
+          }
+          setTimeout(() => resetFormulario("entrega"), 2000);
+        }
+      })
+      .catch(err => {
+        const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
+        targetStatus.innerText = "Error de conexión con el servidor.";
+        targetStatus.className = "status danger";
+        setTimeout(() => resetFormulario(accion), 3000);
+      });
     }
   </script>
 </body>
