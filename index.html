@@ -233,12 +233,14 @@
   </div>
 
   <script>
-    // PEGA AQUÍ LA URL PUBLICA DE TU WEB APP DE GOOGLE APPS SCRIPT (debe terminar en /exec)
+    // URL DE TU WEB APP DE GOOGLE APPS SCRIPT
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbweYvrfdTCcULjSd4sAkEZ2--wMiDiKedQV1BU76LJDEtbBwzLLBGkolHbxEzm4CIDnmA/exec"; 
 
     let modoActual = "retiro";
+    let timerReset = null;
 
     function cambiarTab(modo) {
+      if (timerReset) clearTimeout(timerReset);
       modoActual = modo;
       const tabRetiro = document.getElementById("tabRetiro");
       const tabEntrega = document.getElementById("tabEntrega");
@@ -261,6 +263,8 @@
     }
 
     function resetFormulario(modo) {
+      if (timerReset) clearTimeout(timerReset);
+
       if (modo === "retiro") {
         const inputEq = document.getElementById("inputEquipoRetiro");
         const inputRt = document.getElementById("inputRutRetiro");
@@ -291,6 +295,37 @@
       }
     }
 
+    // 1. FORMATEO DINÁMICO DE RUT CHILENO (Puntos y Guion)
+    function formatearRutChileno(valor) {
+      let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
+      if (limpio === "") return "";
+      
+      let cuerpo = "";
+      let dv = "";
+      
+      if (limpio.endsWith("11") && limpio.length > 3) {
+        cuerpo = limpio.slice(0, -2);
+        dv = "11";
+      } else {
+        cuerpo = limpio.slice(0, -1);
+        dv = limpio.slice(-1);
+      }
+      
+      if (limpio.length === 1 || (limpio.length === 2 && dv === "11")) {
+        return limpio;
+      }
+      
+      let cuerpoFormateado = "";
+      while (cuerpo.length > 3) {
+        cuerpoFormateado = "." + cuerpo.slice(-3) + cuerpoFormateado;
+        cuerpo = cuerpo.slice(0, -3);
+      }
+      cuerpoFormateado = cuerpo + cuerpoFormateado;
+      
+      return cuerpoFormateado + "-" + dv;
+    }
+
+    // 2. NORMALIZACIÓN DE TEXTO Y REEMPLAZO DE -11 POR -K
     function limpiarYNormalizarTexto(str) {
       if (!str) return "";
       let texto = str.trim().toUpperCase();
@@ -300,6 +335,7 @@
       return texto;
     }
 
+    // --- ELEMENTOS RETIRO ---
     const inputEquipoRetiro = document.getElementById("inputEquipoRetiro");
     const inputRutRetiro = document.getElementById("inputRutRetiro");
     const btnGuardarRetiro = document.getElementById("btnGuardarRetiro");
@@ -312,8 +348,8 @@
         if (!inputEquipoRetiro.disabled) {
           inputEquipoRetiro.disabled = true;
           inputRutRetiro.disabled = false;
-          inputRutRetiro.placeholder = "Anotar RUT de la persona...";
-          statusRetiro.innerText = "Paso 2: Anotar RUT de la persona, si es K poner -11";
+          inputRutRetiro.placeholder = "Ej: 12.345.678-9 o -11 para K";
+          statusRetiro.innerText = "Paso 2: Anotar RUT de la persona (si es K usar -11)";
           statusRetiro.className = "status status-step2";
           inputRutRetiro.focus();
         }
@@ -327,17 +363,28 @@
       }
     });
 
+    inputEquipoRetiro.addEventListener("blur", function() {
+      if (!inputEquipoRetiro.disabled && inputEquipoRetiro.value.trim() !== "") {
+        procesarEquipoRetiro();
+      }
+    });
+
+    // Evento INPUT para formatear RUT en tiempo real y activar el botón
     inputRutRetiro.addEventListener("input", function() {
+      inputRutRetiro.value = formatearRutChileno(inputRutRetiro.value);
       btnGuardarRetiro.disabled = (inputRutRetiro.value.trim() === "");
     });
 
     inputRutRetiro.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        confirmarYGuardar("retiro");
+        if (inputRutRetiro.value.trim() !== "") {
+          confirmarYGuardar("retiro");
+        }
       }
     });
 
+    // --- ELEMENTOS ENTREGA ---
     const inputEquipoEntrega = document.getElementById("inputEquipoEntrega");
     const btnGuardarEntrega = document.getElementById("btnGuardarEntrega");
     const statusEntrega = document.getElementById("statusEntrega");
@@ -345,6 +392,10 @@
     inputEquipoEntrega.addEventListener("input", function() {
       const val = inputEquipoEntrega.value.trim();
       btnGuardarEntrega.disabled = (val === "");
+      if (val !== "") {
+        statusEntrega.innerText = "Equipo listo. Presiona Guardar o Enter";
+        statusEntrega.className = "status status-step2";
+      }
     });
 
     inputEquipoEntrega.addEventListener("keypress", function(e) {
@@ -356,6 +407,7 @@
       }
     });
 
+    // 3. ENVÍO Y MANEJO DE RESPUESTAS CON NOMBRE Y EQUIPO
     function confirmarYGuardar(modo) {
       if (modo === "retiro") {
         const equipo = limpiarYNormalizarTexto(inputEquipoRetiro.value);
@@ -366,7 +418,8 @@
         inputRutRetiro.disabled = true;
         btnGuardarRetiro.disabled = true;
         btnGuardarRetiro.innerText = "⏳ Guardando...";
-        statusRetiro.innerText = "Guardando en el servidor...";
+        statusRetiro.innerText = "Procesando retiro en el servidor...";
+        statusRetiro.className = "status";
 
         enviarPeticion("retiro", equipo, rut);
       } else {
@@ -376,18 +429,33 @@
         inputEquipoEntrega.disabled = true;
         btnGuardarEntrega.disabled = true;
         btnGuardarEntrega.innerText = "⏳ Guardando...";
-        statusEntrega.innerText = "Guardando en el servidor...";
+        statusEntrega.innerText = "Procesando entrega en el servidor...";
+        statusEntrega.className = "status";
 
         enviarPeticion("entrega", equipo, "");
       }
     }
 
     function enviarPeticion(accion, equipo, rut) {
+      // Formato explícito de fecha con barras (dd/MM/yyyy HH:mm:ss)
+      const ahora = new Date();
+      const opciones = { timeZone: "America/Santiago", hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      const partesFecha = new Intl.DateTimeFormat('es-CL', opciones).formatToParts(ahora);
+
+      let d = partesFecha.find(p => p.type === 'day').value;
+      let m = partesFecha.find(p => p.type === 'month').value;
+      let y = partesFecha.find(p => p.type === 'year').value;
+      let h = partesFecha.find(p => p.type === 'hour').value;
+      let min = partesFecha.find(p => p.type === 'minute').value;
+      let s = partesFecha.find(p => p.type === 'second').value;
+
+      const fechaConBarras = `${d}/${m}/${y} ${h}:${min}:${s}`;
+
       const payload = {
         accion: accion,
         equipo: equipo,
         rut: rut,
-        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+        fecha: fechaConBarras
       };
 
       fetch(URL_SCRIPT, {
@@ -395,35 +463,39 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error("Error en la red");
+        return response.json();
+      })
       .then(res => {
-        if (accion === "retiro") {
-          if (res.status === "OK") {
-            statusRetiro.innerText = res.mensaje;
-            statusRetiro.className = "status success";
-          } else {
-            statusRetiro.innerText = res.mensaje;
-            statusRetiro.className = "status danger";
-          }
-          setTimeout(() => resetFormulario("retiro"), 2000);
+        const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
+        if (res.status === "OK") {
+          targetStatus.innerText = res.mensaje || "¡Registro exitoso!";
+          targetStatus.className = "status success";
         } else {
-          if (res.status === "OK") {
-            statusEntrega.innerText = res.mensaje;
-            statusEntrega.className = "status success";
-          } else {
-            statusEntrega.innerText = res.mensaje;
-            statusEntrega.className = "status danger";
-          }
-          setTimeout(() => resetFormulario("entrega"), 2000);
+          targetStatus.innerText = res.mensaje || "Atención: No se pudo registrar";
+          targetStatus.className = "status danger";
         }
+        timerReset = setTimeout(() => resetFormulario(accion), 2500);
       })
       .catch(err => {
         const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
         targetStatus.innerText = "Error de conexión con el servidor.";
         targetStatus.className = "status danger";
-        setTimeout(() => resetFormulario(accion), 3000);
+        console.error(err);
+        timerReset = setTimeout(() => resetFormulario(accion), 3000);
       });
     }
+
+    // Prevención de zoom automático al enfocar inputs en teléfonos móviles
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', function() {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+        }, 50);
+      }, { passive: true });
+    });
   </script>
 </body>
 </html>
