@@ -1,6 +1,6 @@
 <!--
 ===================================================================
-  SISTEMA DE GESTIÓN Y AUDITORÍA DE EQUIPOS
+  SISTEMA DE GESTIÓN Y CONTROL DE EQUIPOS
   Desarrollado por: Jose Manuel Jara Barbe
   Año: 2026
   Todos los derechos reservados.
@@ -11,22 +11,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Control de Equipos</title>
+  <title>Sistema de Gestión de Equipos</title>
   <style>
     body { 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
       background-color: #f4f6f9; 
       margin: 0; 
-      padding: 30px 15px; 
+      padding: 20px; 
     }
     
     body::before {
-      content: "PROPIEDAD DE JOSE MANUEL JARA - EQUIPOS";
+      content: "PROPIEDAD DE JOSE MANUEL JARA - 2026";
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) rotate(-30deg);
-      font-size: 30px;
+      font-size: 28px;
       font-weight: bold;
       color: rgba(0, 0, 0, 0.025);
       white-space: nowrap;
@@ -35,70 +35,54 @@
     }
 
     .container { 
-      max-width: 480px; 
+      max-width: 500px; 
       margin: 0 auto; 
       background: white; 
       padding: 25px; 
       border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
       position: relative; 
     }
 
     h2 { 
       text-align: center; 
       color: #1a252f; 
-      margin-top: 5px;
       margin-bottom: 20px; 
-      font-size: 22px;
+      margin-top: 5px; 
     }
-
-    /* PESTAÑAS (TABS) CON RENDERIZADO VISUAL COMPLETO */
-    .tabs {
-      display: flex;
+    
+    /* Pestañas (Tabs) superiores con relleno de color */
+    .tabs { 
+      display: flex; 
       gap: 8px;
-      margin-bottom: 20px;
-      background-color: #f8f9fa;
-      padding: 6px;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
+      margin-bottom: 20px; 
     }
-    .tab {
-      flex: 1;
-      padding: 12px 10px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: bold;
-      color: #4a5568;
-      background-color: #e2e8f0;
-      border-radius: 7px;
-      transition: all 0.2s ease;
-      user-select: none;
-      font-size: 15px;
-      border: none;
-      outline: none;
-    }
-    .tab.active-retiro {
-      background-color: #2980b9 !important;
-      color: #ffffff !important;
-      box-shadow: 0 3px 8px rgba(41, 128, 185, 0.3);
-    }
-    .tab.active-entrega {
-      background-color: #27ae60 !important;
-      color: #ffffff !important;
-      box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
-    }
-
-    .form-section { display: none; }
-    .form-section.active { display: block; }
-
-    .input-group { margin-bottom: 18px; }
-    label { 
-      display: block; 
+    .tab-btn { 
+      flex: 1; 
+      padding: 13px; 
+      font-size: 16px; 
       font-weight: bold; 
-      margin-bottom: 6px; 
-      color: #34495e; 
-      font-size: 14px;
+      background-color: #e2e8f0; 
+      border: none; 
+      border-radius: 8px;
+      cursor: pointer; 
+      color: #475569; 
+      transition: all 0.2s; 
+      user-select: none; 
     }
+    .tab-btn:first-child.active { 
+      background-color: #2980b9; 
+      color: #ffffff; 
+      box-shadow: 0 2px 6px rgba(41, 128, 185, 0.35);
+    }
+    .tab-btn:last-child.active { 
+      background-color: #27ae60; 
+      color: #ffffff; 
+      box-shadow: 0 2px 6px rgba(39, 174, 96, 0.35);
+    }
+
+    .input-group { margin-bottom: 20px; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
     
     input { 
       width: 100%; 
@@ -108,355 +92,305 @@
       border-radius: 6px; 
       box-sizing: border-box; 
       outline: none; 
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
+      -webkit-appearance: none; 
     }
-    input:focus { 
-      border-color: #3498db; 
-      background-color: #eaf2f8; 
-    }
-    input:disabled {
-      background-color: #f2f4f4;
-      cursor: not-allowed;
-    }
+    input:focus { border-color: #3498db; background-color: #eaf2f8; }
+    input:disabled { background-color: #f2f4f4; cursor: not-allowed; }
     
-    .btn-guardar {
-      color: white;
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background-color 0.2s;
-    }
-    .btn-guardar.retiro { background-color: #2980b9; }
-    .btn-guardar.retiro:hover { background-color: #1f618d; }
-    .btn-guardar.entrega { background-color: #27ae60; }
-    .btn-guardar.entrega:hover { background-color: #1e8449; }
-    
-    .btn-guardar:disabled {
-      background-color: #bdc3c7;
-      cursor: not-allowed;
-    }
-
     .status { 
-      padding: 12px; 
+      padding: 14px; 
       font-weight: bold; 
       text-align: center; 
       border-radius: 6px; 
-      margin-bottom: 18px; 
+      margin-bottom: 20px; 
       background-color: #ebf5fb; 
       color: #2980b9; 
       border: 1px solid #aed6f1; 
-      cursor: pointer;
-      user-select: none;
-      font-size: 14px;
+      cursor: pointer; 
+      user-select: none; 
     }
-    .status-step2 {
-      background-color: #fef9e7;
-      color: #7d6608;
-      border-color: #f9e79f;
-    }
-    .success { 
-      background-color: #d4edda; 
-      color: #155724; 
-      border-color: #c3e6cb; 
-    }
-    .danger { 
-      background-color: #f8d7da; 
-      color: #721c24; 
-      border-color: #f5c6cb; 
-    }
+    .status-step2 { background-color: #fef9e7; color: #7d6608; border-color: #f9e79f; }
+    .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
 
-    .watermark {
-      text-align: center;
-      font-size: 11px;
-      color: #a0aec0;
-      margin-top: 25px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      font-weight: 600;
-      user-select: none;
+    .btn-guardar { 
+      background-color: #27ae60; 
+      width: 100%; 
+      padding: 14px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      color: white; 
+      transition: background 0.2s; 
+    }
+    .btn-guardar:hover { background-color: #219653; }
+    .btn-guardar:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+    .watermark { 
+      text-align: center; 
+      font-size: 11px; 
+      color: #95a5a6; 
+      margin-top: 25px; 
+      text-transform: uppercase; 
+      font-weight: 600; 
+      user-select: none; 
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2>Control de Equipos</h2>
+    <h2>Sistema de Gestión de Equipos</h2>
 
-    <!-- PESTAÑAS PRINCIPALES -->
+    <!-- Pestañas de Navegación -->
     <div class="tabs">
-      <button type="button" id="tabRetiro" class="tab active-retiro" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
-      <button type="button" id="tabEntrega" class="tab" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
+      <button id="tabRetiro" class="tab-btn active" onclick="cambiarTab('retiro')">📥 Retiro Equipo</button>
+      <button id="tabEntrega" class="tab-btn" onclick="cambiarTab('entrega')">📤 Entrega Equipo</button>
     </div>
 
-    <!-- SECCIÓN RETIRO -->
-    <div id="seccionRetiro" class="form-section active">
-      <div id="statusRetiro" class="status" onclick="resetFormulario('retiro')" title="Haz clic para reiniciar">
-        Paso 1: Anotación de número de EQUIPO
-      </div>
-
-      <div class="input-group">
-        <label for="inputEquipoRetiro">N° de Equipo:</label>
-        <input type="text" inputmode="numeric" id="inputEquipoRetiro" placeholder="Anotar número de equipo..." autocomplete="off">
-      </div>
-
-      <div class="input-group">
-        <label for="inputRutRetiro">RUT de la Persona:</label>
-        <input type="text" inputmode="numeric" id="inputRutRetiro" placeholder="Esperando equipo..." disabled autocomplete="off">
-      </div>
-
-      <button type="button" id="btnGuardarRetiro" class="btn-guardar retiro" onclick="confirmarYGuardar('retiro')" disabled>💾 Guardar Retiro</button>
+    <div id="statusBox" class="status" onclick="resetFormulario()" title="Haz clic para reiniciar">
+      Paso 1: Anotar número de equipo
     </div>
 
-    <!-- SECCIÓN ENTREGA -->
-    <div id="seccionEntrega" class="form-section">
-      <div id="statusEntrega" class="status status-step2" onclick="resetFormulario('entrega')" title="Haz clic para reiniciar">
-        Paso 1: Anotar número de EQUIPO a devolver
-      </div>
-
-      <div class="input-group">
-        <label for="inputEquipoEntrega">N° de Equipo a Devolver:</label>
-        <input type="text" inputmode="numeric" id="inputEquipoEntrega" placeholder="Anotar número de equipo..." autocomplete="off">
-      </div>
-
-      <button type="button" id="btnGuardarEntrega" class="btn-guardar entrega" onclick="confirmarYGuardar('entrega')" disabled>💾 Guardar Entrega</button>
+    <!-- Campo Equipo -->
+    <div class="input-group">
+      <label for="inputEquipo">N° de Equipo:</label>
+      <input type="text" inputmode="numeric" id="inputEquipo" placeholder="Anotar número de equipo..." autocomplete="off">
     </div>
+
+    <!-- Campo RUT (Solo visible/activo en Retiro) -->
+    <div class="input-group" id="groupRut">
+      <label for="inputRut">RUT de la Persona:</label>
+      <input type="text" inputmode="numeric" id="inputRut" placeholder="Anotar RUT (si es K usar -11)..." disabled autocomplete="off">
+    </div>
+
+    <!-- Botón Guardar -->
+    <button id="btnGuardar" class="btn-guardar" onclick="confirmarYGuardar()" disabled>💾 Guardar Registro</button>
 
     <div class="watermark">
-      PROPIEDAD DE JOSE MANUEL JARA - EQUIPOS
+      JOSE MANUEL JARA BARBE - 2026
     </div>
   </div>
 
   <script>
-    // URL DE TU WEB APP DE GOOGLE APPS SCRIPT
+    // Reemplaza con tu URL de Google Apps Script desplegada (terminada en /exec)
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx4Y59qRdpcumBouKFDSjDDpzFnaK3RPtMJOQ0AdPNt5MGgRRi6f-JJ7TydAtKmnW6wlQ/exec"; 
-
+    
     let modoActual = "retiro";
     let timerReset = null;
+
+    const tabRetiro = document.getElementById("tabRetiro");
+    const tabEntrega = document.getElementById("tabEntrega");
+    const inputEquipo = document.getElementById("inputEquipo");
+    const inputRut = document.getElementById("inputRut");
+    const groupRut = document.getElementById("groupRut");
+    const statusBox = document.getElementById("statusBox");
+    const btnGuardar = document.getElementById("btnGuardar");
 
     function cambiarTab(modo) {
       if (timerReset) clearTimeout(timerReset);
       modoActual = modo;
-      const tabRetiro = document.getElementById("tabRetiro");
-      const tabEntrega = document.getElementById("tabEntrega");
-      const seccionRetiro = document.getElementById("seccionRetiro");
-      const seccionEntrega = document.getElementById("seccionEntrega");
+
+      tabRetiro.classList.remove("active");
+      tabEntrega.classList.remove("active");
 
       if (modo === "retiro") {
-        tabRetiro.className = "tab active-retiro";
-        tabEntrega.className = "tab";
-        seccionRetiro.classList.add("active");
-        seccionEntrega.classList.remove("active");
-        resetFormulario("retiro");
+        tabRetiro.classList.add("active");
+        groupRut.style.display = "block";
       } else {
-        tabEntrega.className = "tab active-entrega";
-        tabRetiro.className = "tab";
-        seccionEntrega.classList.add("active");
-        seccionRetiro.classList.remove("active");
-        resetFormulario("entrega");
+        tabEntrega.classList.add("active");
+        groupRut.style.display = "none";
       }
+
+      resetFormulario();
     }
 
-    function resetFormulario(modo) {
+    function resetFormulario() {
       if (timerReset) clearTimeout(timerReset);
 
-      if (modo === "retiro") {
-        const inputEq = document.getElementById("inputEquipoRetiro");
-        const inputRt = document.getElementById("inputRutRetiro");
-        const btnG = document.getElementById("btnGuardarRetiro");
-        const statusR = document.getElementById("statusRetiro");
+      inputEquipo.value = "";
+      inputRut.value = "";
+      inputEquipo.disabled = false;
+      inputRut.disabled = true;
+      btnGuardar.innerText = "💾 Guardar Registro";
 
-        inputEq.value = "";
-        inputRt.value = "";
-        inputEq.disabled = false;
-        inputRt.disabled = true;
-        btnG.disabled = true;
-        btnG.innerText = "💾 Guardar Retiro";
-        statusR.innerText = "Paso 1: Anotación de número de EQUIPO";
-        statusR.className = "status";
-        setTimeout(() => inputEq.focus(), 50);
+      if (modoActual === "retiro") {
+        statusBox.innerText = "Paso 1: Anotar número de equipo";
+        btnGuardar.disabled = true;
       } else {
-        const inputEqE = document.getElementById("inputEquipoEntrega");
-        const btnGE = document.getElementById("btnGuardarEntrega");
-        const statusE = document.getElementById("statusEntrega");
-
-        inputEqE.value = "";
-        inputEqE.disabled = false;
-        btnGE.disabled = true;
-        btnGE.innerText = "💾 Guardar Entrega";
-        statusE.innerText = "Paso 1: Anotar número de EQUIPO a devolver";
-        statusE.className = "status status-step2";
-        setTimeout(() => inputEqE.focus(), 50);
+        statusBox.innerText = "Anotar número de equipo a devolver";
+        btnGuardar.disabled = true;
       }
+      statusBox.className = "status";
+
+      setTimeout(() => inputEquipo.focus(), 50);
     }
 
-    // 1. FORMATEO DINÁMICO DE RUT CHILENO (Puntos y Guion)
-   function formatearRutChileno(valor) {
-    let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
-    if (limpio === "") return "";
-
-    let cuerpo = "";
-    let dv = "";
-
-  // Solo asume -11 (K) si tiene 10 dígitos en total (ej: 10049860 + 11)
-  // o si el usuario escribió explícitamente "-11"
-    if ((limpio.endsWith("11") && limpio.length === 10) || valor.endsWith("-11")) {
-      cuerpo = limpio.slice(0, -2);
-      dv = "11";
-    } else {
-      cuerpo = limpio.slice(0, -1);
-      dv = limpio.slice(-1);
+    function limpiarTexto(str) {
+      return str ? str.trim().toUpperCase() : "";
     }
 
-    if (limpio.length === 1 || (limpio.length === 2 && dv === "11")) {
-      return limpio;
-    }
-
-    let cuerpoFormateado = "";
-    while (cuerpo.length > 3) {
-      cuerpoFormateado = "." + cuerpo.slice(-3) + cuerpoFormateado;
-      cuerpo = cuerpo.slice(0, -3);
-    }
-    cuerpoFormateado = cuerpo + cuerpoFormateado;
-
-    return cuerpoFormateado + "-" + dv;
-  }
-
-    // 2. NORMALIZACIÓN DE TEXTO Y REEMPLAZO DE -11 POR -K
-    function limpiarYNormalizarTexto(str) {
-      if (!str) return "";
-      let texto = str.trim().toUpperCase();
-      if (texto.endsWith("-11")) {
-        texto = texto.slice(0, -3) + "-K";
+    // Formateo automático de RUT chileno con corrección para terminados en 1-1 (ej: 20.814.831-1)
+    function formatearRutChileno(valor) {
+      let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
+      if (limpio === "") return "";
+      
+      let cuerpo = "";
+      let dv = "";
+      
+      // Solo interpreta -11 (K) si tiene 10 dígitos en total (ej: 1004986011) o si se escribió explícitamente "-11"
+      if ((limpio.endsWith("11") && limpio.length === 10) || valor.endsWith("-11")) {
+        cuerpo = limpio.slice(0, -2);
+        dv = "11";
+      } else {
+        cuerpo = limpio.slice(0, -1);
+        dv = limpio.slice(-1);
       }
-      return texto;
+      
+      if (limpio.length === 1 || (limpio.length === 2 && dv === "11")) {
+        return limpio;
+      }
+      
+      let cuerpoFormateado = "";
+      while (cuerpo.length > 3) {
+        cuerpoFormateado = "." + cuerpo.slice(-3) + cuerpoFormateado;
+        cuerpo = cuerpo.slice(0, -3);
+      }
+      cuerpoFormateado = cuerpo + cuerpoFormateado;
+      
+      return cuerpoFormateado + "-" + dv;
     }
 
-    // --- ELEMENTOS RETIRO ---
-    const inputEquipoRetiro = document.getElementById("inputEquipoRetiro");
-    const inputRutRetiro = document.getElementById("inputRutRetiro");
-    const btnGuardarRetiro = document.getElementById("btnGuardarRetiro");
-    const statusRetiro = document.getElementById("statusRetiro");
+    inputRut.addEventListener("input", function() {
+      let valorActual = inputRut.value;
+      inputRut.value = formatearRutChileno(valorActual);
+
+      if (modoActual === "retiro") {
+        btnGuardar.disabled = (inputRut.value.trim() === "");
+      }
+    });
 
     function procesarEquipoRetiro() {
-      const val = limpiarYNormalizarTexto(inputEquipoRetiro.value);
+      if (inputEquipo.disabled) return;
+      const val = limpiarTexto(inputEquipo.value);
       if (val !== "") {
-        inputEquipoRetiro.value = val;
-        if (!inputEquipoRetiro.disabled) {
-          inputEquipoRetiro.disabled = true;
-          inputRutRetiro.disabled = false;
-          inputRutRetiro.placeholder = "Ej: 12.345.678-9 o -11 para K";
-          statusRetiro.innerText = "Paso 2: Anotar RUT de la persona (si es K usar -11)";
-          statusRetiro.className = "status status-step2";
-          inputRutRetiro.focus();
+        inputEquipo.value = val;
+        inputEquipo.disabled = true;
+        inputRut.disabled = false;
+        inputRut.focus();
+        statusBox.innerText = "Paso 2: Anotar RUT de la persona (si es K usar -11)";
+        statusBox.className = "status status-step2";
+        if (inputRut.value.trim() !== "") {
+          btnGuardar.disabled = false;
         }
-      }
-    }
-
-    inputEquipoRetiro.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        procesarEquipoRetiro();
-      }
-    });
-
-    inputEquipoRetiro.addEventListener("blur", function() {
-      if (!inputEquipoRetiro.disabled && inputEquipoRetiro.value.trim() !== "") {
-        procesarEquipoRetiro();
-      }
-    });
-
-    // Evento INPUT para formatear RUT en tiempo real y activar el botón
-    inputRutRetiro.addEventListener("input", function() {
-      inputRutRetiro.value = formatearRutChileno(inputRutRetiro.value);
-      btnGuardarRetiro.disabled = (inputRutRetiro.value.trim() === "");
-    });
-
-    inputRutRetiro.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (inputRutRetiro.value.trim() !== "") {
-          confirmarYGuardar("retiro");
-        }
-      }
-    });
-
-    // --- ELEMENTOS ENTREGA ---
-    const inputEquipoEntrega = document.getElementById("inputEquipoEntrega");
-    const btnGuardarEntrega = document.getElementById("btnGuardarEntrega");
-    const statusEntrega = document.getElementById("statusEntrega");
-
-    inputEquipoEntrega.addEventListener("input", function() {
-      const val = inputEquipoEntrega.value.trim();
-      btnGuardarEntrega.disabled = (val === "");
-      if (val !== "") {
-        statusEntrega.innerText = "Equipo listo. Presiona Guardar o Enter";
-        statusEntrega.className = "status status-step2";
-      }
-    });
-
-    inputEquipoEntrega.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (inputEquipoEntrega.value.trim() !== "") {
-          confirmarYGuardar("entrega");
-        }
-      }
-    });
-
-    // 3. ENVÍO Y MANEJO DE RESPUESTAS CON NOMBRE Y EQUIPO
-    function confirmarYGuardar(modo) {
-      if (modo === "retiro") {
-        const equipo = limpiarYNormalizarTexto(inputEquipoRetiro.value);
-        const rut = limpiarYNormalizarTexto(inputRutRetiro.value);
-        if (!equipo || !rut) return;
-
-        inputEquipoRetiro.disabled = true;
-        inputRutRetiro.disabled = true;
-        btnGuardarRetiro.disabled = true;
-        btnGuardarRetiro.innerText = "⏳ Guardando...";
-        statusRetiro.innerText = "Procesando retiro en el servidor...";
-        statusRetiro.className = "status";
-
-        enviarPeticion("retiro", equipo, rut);
       } else {
-        const equipo = limpiarYNormalizarTexto(inputEquipoEntrega.value);
-        if (!equipo) return;
-
-        inputEquipoEntrega.disabled = true;
-        btnGuardarEntrega.disabled = true;
-        btnGuardarEntrega.innerText = "⏳ Guardando...";
-        statusEntrega.innerText = "Procesando entrega en el servidor...";
-        statusEntrega.className = "status";
-
-        enviarPeticion("entrega", equipo, "");
+        statusBox.innerText = "Falta anotar el número de equipo";
+        statusBox.className = "status danger";
       }
     }
 
-    function enviarPeticion(accion, equipo, rut) {
-      // Formato explícito de fecha con barras (dd/MM/yyyy HH:mm:ss)
-      const ahora = new Date();
-      const opciones = { timeZone: "America/Santiago", hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-      const partesFecha = new Intl.DateTimeFormat('es-CL', opciones).formatToParts(ahora);
+    inputEquipo.addEventListener("input", function() {
+      const val = inputEquipo.value.trim();
+      if (modoActual === "entrega") {
+        btnGuardar.disabled = (val === "");
+        if (val !== "") {
+          statusBox.innerText = "Equipo listo. Presiona Guardar o Enter";
+          statusBox.className = "status status-step2";
+        } else {
+          statusBox.innerText = "Anotar número de equipo a devolver";
+          statusBox.className = "status";
+        }
+      }
+    });
 
+    inputEquipo.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const valEquipo = limpiarTexto(inputEquipo.value);
+        if (valEquipo === "") {
+          statusBox.innerText = "Falta anotar el número de equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+
+        if (modoActual === "retiro") {
+          procesarEquipoRetiro();
+        } else {
+          confirmarYGuardar();
+        }
+      }
+    });
+
+    inputRut.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (inputRut.value.trim() !== "") {
+          confirmarYGuardar();
+        }
+      }
+    });
+
+    function confirmarYGuardar() {
+      const equipo = limpiarTexto(inputEquipo.value);
+      let rut = limpiarTexto(inputRut.value);
+
+      if (modoActual === "retiro") {
+        if (equipo === "" || rut === "") {
+          statusBox.innerText = "Falta anotar RUT o número de equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+      } else {
+        if (equipo === "") {
+          statusBox.innerText = "Falta anotar el número de equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+      }
+
+      // Convierte -11 a -K antes de consultar en la base de datos
+      if (rut.endsWith("-11")) {
+        rut = rut.slice(0, -3) + "-K";
+      }
+
+      // Bloquear controles y mostrar estado de carga
+      inputEquipo.disabled = true;
+      inputRut.disabled = true;
+      btnGuardar.disabled = true;
+      btnGuardar.innerText = "⏳ Guardando...";
+
+      statusBox.innerText = "Procesando registro en el servidor...";
+      statusBox.className = "status";
+
+      // Generar fecha estrictamente con barras (/) y zona horaria de Santiago
+      const ahora = new Date();
+      const opciones = { 
+        timeZone: "America/Santiago", 
+        hour12: false, 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      };
+      const partesFecha = new Intl.DateTimeFormat('es-CL', opciones).formatToParts(ahora);
+      
       let d = partesFecha.find(p => p.type === 'day').value;
       let m = partesFecha.find(p => p.type === 'month').value;
       let y = partesFecha.find(p => p.type === 'year').value;
       let h = partesFecha.find(p => p.type === 'hour').value;
       let min = partesFecha.find(p => p.type === 'minute').value;
       let s = partesFecha.find(p => p.type === 'second').value;
-
+      
       const fechaConBarras = `${d}/${m}/${y} ${h}:${min}:${s}`;
 
       const payload = {
-        accion: accion,
+        accion: modoActual,
         equipo: equipo,
-        rut: rut,
+        rut: (modoActual === "retiro") ? rut : "",
         fecha: fechaConBarras
       };
 
@@ -470,26 +404,25 @@
         return response.json();
       })
       .then(res => {
-        const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
         if (res.status === "OK") {
-          targetStatus.innerText = res.mensaje || "¡Registro exitoso!";
-          targetStatus.className = "status success";
+          // Despliega el mensaje del servidor (con Nombre y N° de Equipo)
+          statusBox.innerText = res.mensaje || `¡Registro exitoso! Equipo: ${equipo}`;
+          statusBox.className = "status success";
         } else {
-          targetStatus.innerText = res.mensaje || "Atención: No se pudo registrar";
-          targetStatus.className = "status danger";
+          statusBox.innerText = res.mensaje || "Atención: No se pudo registrar";
+          statusBox.className = "status danger";
         }
-        timerReset = setTimeout(() => resetFormulario(accion), 2500);
+        timerReset = setTimeout(resetFormulario, 2500);
       })
       .catch(err => {
-        const targetStatus = (accion === "retiro") ? statusRetiro : statusEntrega;
-        targetStatus.innerText = "Error de conexión con el servidor.";
-        targetStatus.className = "status danger";
+        statusBox.innerText = "Error de conexión con el servidor";
+        statusBox.className = "status danger";
         console.error(err);
-        timerReset = setTimeout(() => resetFormulario(accion), 3000);
+        timerReset = setTimeout(resetFormulario, 3000);
       });
     }
 
-    // Prevención de zoom automático al enfocar inputs en teléfonos móviles
+    // Parche anti-zoom para celulares
     document.querySelectorAll('input').forEach(input => {
       input.addEventListener('focus', function() {
         setTimeout(() => {
@@ -498,6 +431,8 @@
         }, 50);
       }, { passive: true });
     });
+
+    window.onload = () => resetFormulario();
   </script>
 </body>
 </html>
