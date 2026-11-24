@@ -142,7 +142,7 @@
 <body>
 
   <div class="container">
-    <h2>Sistema de Gestión de Equipos v2</h2>
+    <h2>Sistema de Gestión de Equipos</h2>
 
     <!-- Pestañas de Navegación -->
     <div class="tabs">
@@ -175,7 +175,7 @@
   </div>
 
   <script>
-    // IMPORTANTE: Reemplaza esta URL por la de tu implementación de Google Apps Script (/exec)
+    // URL de tu implementación de Google Apps Script (/exec)
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx4Y59qRdpcumBouKFDSjDDpzFnaK3RPtMJOQ0AdPNt5MGgRRi6f-JJ7TydAtKmnW6wlQ/exec"; 
     
     let modoActual = "retiro";
@@ -232,7 +232,7 @@
       return str ? str.trim().toUpperCase() : "";
     }
 
-    // Formateo automático de RUT chileno corregido (evita conflicto con terminados en 1-1 como 20.814.831-1)
+    // Formateo automático de RUT chileno (soporta 7 y 8 dígitos, terminados en 1-1 y K con -11)
     function formatearRutChileno(valor) {
       let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
       if (limpio === "") return "";
@@ -240,12 +240,18 @@
       let cuerpo = "";
       let dv = "";
       
-      if ((limpio.endsWith("11") && limpio.length === 10) || valor.endsWith("-11")) {
+      // Detecta -11 (K) solo cuando tiene 10 dígitos en total (8 de cuerpo + 11, o 0 + 7 de cuerpo + 11)
+      if (limpio.endsWith("11") && limpio.length === 10) {
         cuerpo = limpio.slice(0, -2);
         dv = "11";
       } else {
         cuerpo = limpio.slice(0, -1);
         dv = limpio.slice(-1);
+      }
+
+      // Quita cero inicial si se usó para un RUT de 7 dígitos terminado en -11 (ej: 0987654111 -> 9.876.541-11)
+      if (cuerpo.length === 8 && cuerpo.startsWith("0")) {
+        cuerpo = cuerpo.slice(1);
       }
       
       if (limpio.length === 1 || (limpio.length === 2 && dv === "11")) {
