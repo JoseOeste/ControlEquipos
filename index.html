@@ -175,7 +175,7 @@
   </div>
 
   <script>
-    // Reemplaza con tu URL de Google Apps Script desplegada (terminada en /exec)
+    // IMPORTANTE: Reemplaza esta URL por la de tu implementación de Google Apps Script (/exec)
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx4Y59qRdpcumBouKFDSjDDpzFnaK3RPtMJOQ0AdPNt5MGgRRi6f-JJ7TydAtKmnW6wlQ/exec"; 
     
     let modoActual = "retiro";
@@ -232,7 +232,7 @@
       return str ? str.trim().toUpperCase() : "";
     }
 
-    // Formateo automático de RUT chileno con corrección para terminados en 1-1 (ej: 20.814.831-1)
+    // Formateo automático de RUT chileno corregido (evita conflicto con terminados en 1-1 como 20.814.831-1)
     function formatearRutChileno(valor) {
       let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
       if (limpio === "") return "";
@@ -240,7 +240,6 @@
       let cuerpo = "";
       let dv = "";
       
-      // Solo interpreta -11 (K) si tiene 10 dígitos en total (ej: 1004986011) o si se escribió explícitamente "-11"
       if ((limpio.endsWith("11") && limpio.length === 10) || valor.endsWith("-11")) {
         cuerpo = limpio.slice(0, -2);
         dv = "11";
@@ -350,12 +349,11 @@
         }
       }
 
-      // Convierte -11 a -K antes de consultar en la base de datos
+      // Convierte -11 a -K antes de enviar al servidor
       if (rut.endsWith("-11")) {
         rut = rut.slice(0, -3) + "-K";
       }
 
-      // Bloquear controles y mostrar estado de carga
       inputEquipo.disabled = true;
       inputRut.disabled = true;
       btnGuardar.disabled = true;
@@ -364,7 +362,7 @@
       statusBox.innerText = "Procesando registro en el servidor...";
       statusBox.className = "status";
 
-      // Generar fecha estrictamente con barras (/) y zona horaria de Santiago
+      // Fecha estrictamente con barras (/) y zona horaria de Santiago
       const ahora = new Date();
       const opciones = { 
         timeZone: "America/Santiago", 
@@ -405,7 +403,6 @@
       })
       .then(res => {
         if (res.status === "OK") {
-          // Despliega el mensaje del servidor (con Nombre y N° de Equipo)
           statusBox.innerText = res.mensaje || `¡Registro exitoso! Equipo: ${equipo}`;
           statusBox.className = "status success";
         } else {
